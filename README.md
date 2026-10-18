@@ -4,7 +4,7 @@ docker image based on alpine:latest to run [Pure-FTPd](https://www.pureftpd.org/
 
 ## Tags
 
-* `latest` - `amd64`
+* `latest` - `amd64`, `arm64`
 
 ## Usage
 
