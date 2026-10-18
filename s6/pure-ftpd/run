@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# flags are built by the entrypoint and passed in via the environment
+# shellcheck disable=SC2086
+exec /usr/sbin/pure-ftpd ${PURE_FTPD_FLAGS} < /dev/null
