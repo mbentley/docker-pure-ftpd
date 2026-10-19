@@ -10,7 +10,5 @@ RUN apk add --no-cache openssl pure-ftpd s6 &&\
 COPY s6 /etc/s6
 COPY entrypoint.sh /
 
-EXPOSE 21 30000-30009
-
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["s6-svscan","/etc/s6"]

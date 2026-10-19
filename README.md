@@ -1,6 +1,6 @@
 # mbentley/pure-ftpd
 
-docker image based on alpine:latest to run [Pure-FTPd](https://www.pureftpd.org/) with a single virtual user that is configured entirely through environment variables. There are no `VOLUME`s declared; bind mount whatever you need.
+docker image based on `mbentley/alpine:latest` to run [Pure-FTPd](https://www.pureftpd.org/) with a single virtual user that is configured entirely through environment variables.
 
 ## Tags
 
@@ -10,23 +10,19 @@ docker image based on alpine:latest to run [Pure-FTPd](https://www.pureftpd.org/
 
 ```
 docker run -d \
-  --name scan-ftp \
-  --hostname scan-ftp \
+  --name pure-ftpd \
+  --hostname pure-ftpd \
   -p 21:21 \
   -p 30000-30009:30000-30009 \
-  -e PUBLICHOST="192.168.2.212" \
-  -e FTP_USER_NAME="scanner" \
+  -e PUBLICHOST="192.168.0.100" \
+  -e FTP_USER_NAME="myuser" \
   -e FTP_USER_PASS="password" \
-  -e FTP_USER_HOME="/scanner" \
-  -e FTP_USER_UID="1003" \
-  -e FTP_USER_GID="103" \
-  --mount type=bind,source=/zfs/storage/scanner,destination=/scanner \
+  -e FTP_USER_HOME="/myuser" \
+  -e FTP_USER_UID="1000" \
+  -e FTP_USER_GID="1000" \
+  --mount type=bind,source=/path/to/your/storage/myuser,destination=/myuser \
   mbentley/pure-ftpd
 ```
-
-If the container has its own IP (e.g. macvlan), there is no need to publish ports; use `--network` and `--ip` instead of `-p`.
-
-No `--init` is needed. The container's PID 1 is `s6-svscan`, which supervises the services and handles signals so `docker stop` is a clean shutdown.
 
 ## Environment variables
 
@@ -55,7 +51,7 @@ Files are created as `FTP_USER_UID`:`FTP_USER_GID`. The entrypoint does not chan
 
 ## Passive mode and ports
 
-Pure-FTPd listens on `21` and uses passive ports `30000-30009` by default (`EXPOSE`d in the image). If you publish ports with `-p`, publish the passive range as well and change `FTP_PASSIVE_PORTS` to match if you use a different range. `PUBLICHOST` must be an address the client can reach.
+Pure-FTPd listens on `21` and uses passive ports `30000-30009` by default. The image does not `EXPOSE` any ports, so you need to publish them yourself (see the usage example above): `-p 21:21` for the control port and `-p 30000-30009:30000-30009` for the passive range. If you use a different range, change `FTP_PASSIVE_PORTS` to match and publish that range instead. `PUBLICHOST` must be an address the client can reach.
 
 ## TLS
 
@@ -65,7 +61,7 @@ A certificate and key in a single PEM file is read from `/etc/ssl/private/pure-f
 
 ```
 -e TLS_MODE=2 \
--v /path/to/pure-ftpd.pem:/etc/ssl/private/pure-ftpd.pem:ro
+--mount type=bind,source=/path/to/pure-ftpd.pem,destination=/etc/ssl/private/pure-ftpd.pem,readonly
 ```
 
 ## Logging
